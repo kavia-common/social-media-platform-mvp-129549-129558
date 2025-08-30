@@ -1,10 +1,14 @@
 import { useAuthStore } from '@/stores/auth'
 
-// IMPORTANT: Configure VITE_API_BASE_URL in .env to point to the FastAPI backend base URL.
-// If empty, requests will be made relative to the frontend origin, which will fail in split deployments.
+/**
+ * IMPORTANT: Configure VITE_API_BASE_URL in .env to point to the FastAPI backend base URL.
+ * If empty, requests will be made relative to the frontend origin, which will fail in split deployments.
+ * The backend expects Authorization headers as: "Bearer <token>" for protected endpoints.
+ * The default admin credentials are "admin" / "admin".
+ */
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || ''
 
-// Use a concrete Record<string, string> for headers to allow dynamic keys like Authorization
+// Internal fetch wrapper that automatically attaches JSON headers and Authorization when available.
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const auth = useAuthStore()
   const baseHeaders: Record<string, string> = {
