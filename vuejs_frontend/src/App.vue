@@ -1,85 +1,134 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useAuthStore } from './stores/auth'
+
+const auth = useAuthStore()
+const router = useRouter()
+
+const isAuthed = computed(() => auth.isAuthenticated)
+const userName = computed(() => auth.user?.username ?? '')
+const isAdmin = computed(() => auth.user?.is_admin ?? false)
+
+function logout() {
+  auth.logout()
+  router.push({ name: 'login' })
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" @click="$router.push({ name: 'feed' })">
+        <div class="logo-dot" />
+        <span class="brand-text">SnapLite</span>
+      </div>
+      <nav class="nav-actions">
+        <RouterLink v-if="!isAuthed" class="btn btn-ghost" :to="{ name: 'login' }">Login</RouterLink>
+        <RouterLink v-if="!isAuthed" class="btn btn-ghost" :to="{ name: 'register' }">Register</RouterLink>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <div v-if="isAuthed" class="profile">
+          <RouterLink class="btn btn-ghost" :to="{ name: 'feed' }">Feed</RouterLink>
+          <RouterLink class="btn btn-ghost" :to="{ name: 'profile', params: { username: userName } }">
+            {{ userName || 'Profile' }}
+          </RouterLink>
+          <span v-if="isAdmin" class="badge">Admin</span>
+          <button class="btn btn-accent" @click="logout">Logout</button>
+        </div>
       </nav>
-    </div>
-  </header>
+    </header>
 
-  <RouterView />
+    <main class="content">
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+:root {
+  --primary: #3897f0;
+  --secondary: #262626;
+  --accent: #ed4956;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.app-shell {
+  min-height: 100vh;
+  background: #fff;
+  color: var(--secondary);
 }
 
-nav {
-  width: 100%;
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid #efefef;
+  background: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.logo-dot {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  border-radius: 6px;
+}
+.brand-text {
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: var(--secondary);
+}
+
+.nav-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--secondary);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover {
+  background: #f7f8fa;
+}
+.btn-ghost {
+  border-color: transparent;
+}
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-accent:hover {
+  filter: brightness(0.95);
+}
+
+.badge {
   font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+  color: #fff;
+  background: var(--primary);
+  border-radius: 999px;
+  padding: 4px 8px;
+  margin-right: 4px;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px;
 }
 </style>

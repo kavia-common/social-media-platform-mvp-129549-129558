@@ -1,35 +1,82 @@
 @import './base.css';
 
+:root {
+  --primary: #3897f0;
+  --secondary: #262626;
+  --accent: #ed4956;
+}
+
+html, body, #app {
+  height: 100%;
+}
+
 #app {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   font-weight: normal;
 }
 
-a,
-.green {
+a {
+  color: var(--primary);
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+.card {
+  background: #fff;
+  border: 1px solid #efefef;
+  border-radius: 14px;
+  padding: 12px;
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+.input, .textarea {
+  width: 100%;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+}
+.input:focus, .textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(56, 151, 240, 0.12);
+}
+.textarea {
+  min-height: 90px;
+  resize: vertical;
+}
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+.btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--secondary);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-outline {
+  border-color: #e6e6e6;
+}
+.btn:hover {
+  filter: brightness(0.98);
+}
+
+.muted {
+  color: #8e8e8e;
+}
+
+hr.sep {
+  border: none;
+  border-top: 1px solid #efefef;
+  margin: 12px 0;
 }
