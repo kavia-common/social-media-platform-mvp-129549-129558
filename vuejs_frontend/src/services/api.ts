@@ -1,6 +1,8 @@
 import { useAuthStore } from '@/stores/auth'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+// IMPORTANT: Configure VITE_API_BASE_URL in .env to point to the FastAPI backend base URL.
+// If empty, requests will be made relative to the frontend origin, which will fail in split deployments.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || ''
 
 // Use a concrete Record<string, string> for headers to allow dynamic keys like Authorization
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -24,18 +26,25 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     baseHeaders.Authorization = `Bearer ${auth.token}`
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: baseHeaders })
+  const url = API_BASE ? `${API_BASE}${path}` : path
+  const res = await fetch(url, { ...options, headers: baseHeaders })
 
   if (!res.ok) {
-    // Attempt to parse error body
+    // Attempt to parse error body (JSON with {detail} or plain text)
     let msg = `Request failed: ${res.status}`
     try {
-      const data: unknown = await res.json()
-      if (data && typeof data === 'object' && 'detail' in data) {
-        msg = String((data as { detail?: unknown }).detail ?? msg)
+      const ct = res.headers.get('content-type') || ''
+      if (ct.includes('application/json')) {
+        const data: unknown = await res.json()
+        if (data && typeof data === 'object' && 'detail' in data) {
+          msg = String((data as { detail?: unknown }).detail ?? msg)
+        }
+      } else {
+        const t = await res.text()
+        if (t) msg = t
       }
     } catch {
-      /* ignore JSON parse error */
+      /* ignore body parse error */
     }
     throw new Error(msg)
   }
